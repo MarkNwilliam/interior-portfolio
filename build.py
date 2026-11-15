@@ -1,0 +1,458 @@
+#!/usr/bin/env python3
+"""Static site generator for the interior portfolio."""
+import os
+from html import escape
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
+BASE = "https://marknwilliam.github.io/interior-portfolio"
+SITE = "Nkugwa Mark William"
+EMAIL = "hello@nkugwamarkwilliam.com"
+X_HANDLE = "MarkNkugwa"
+
+PROJECTS = [
+    {
+        "slug": "oak-and-light",
+        "title": "Oak &amp; Light",
+        "plain": "Oak & Light",
+        "category": "Residential · Living",
+        "year": "2026",
+        "typology": "Living room",
+        "area": "48 m²",
+        "scope": "Spatial planning, material palette, styling",
+        "palette": "Oak, linen, lime wash, aged brass",
+        "img": "oak-and-light",
+        "widths": [1800, 1200, 800],
+        "w": 1800, "h": 1000,
+        "alt": "Warm minimal living room with a low linen sofa, oak floor and soft afternoon light",
+        "intro": "A living room composed around a single shaft of afternoon light — oak, linen and lime-washed walls in quiet conversation.",
+        "body": [
+            "The brief asked for calm: a room that could hold a long conversation, a stack of books and nothing louder than the light. The shell stays almost silent — lime-washed walls, a pale oak floor — so texture can do the talking.",
+            "A low linen sofa sits opposite a pair of sculptural armchairs. Brass appears only at the edges: a side table, the lip of a lamp. The result is warm without being heavy, and quiet without feeling empty.",
+        ],
+        "captions": ["Morning light across the seating group", "Linen, oak and a single brass note"],
+        "card": "wide",
+    },
+    {
+        "slug": "quiet-quarters",
+        "title": "Quiet Quarters",
+        "plain": "Quiet Quarters",
+        "category": "Residential · Bedroom",
+        "year": "2026",
+        "typology": "Bedroom",
+        "area": "22 m²",
+        "scope": "Concept, layout, soft furnishing",
+        "palette": "Oat, clay, walnut, raw cotton",
+        "img": "quiet-quarters",
+        "widths": [1800, 1200, 800],
+        "w": 1800, "h": 1200,
+        "alt": "Serene minimalist bedroom in warm neutral tones with soft natural light",
+        "intro": "A bedroom reduced to its essentials: soft light, natural fibres and a palette that feels like early morning.",
+        "body": [
+            "Everything that does not help the room rest was removed. The bed sits low and centred, dressed in washed cotton; a single walnut surface carries the lamp, the book, the glass of water.",
+            "Walls are held in a warm oat tone, darker than the linen so the room softens at dusk. There is no art above the bed — only shadow, and the quiet geometry of the headboard.",
+        ],
+        "captions": ["Washed cotton and a low walnut ledge", "Soft light at the edge of the room"],
+        "card": "narrow",
+    },
+    {
+        "slug": "warm-kitchen",
+        "title": "The Warm Kitchen",
+        "plain": "The Warm Kitchen",
+        "category": "Residential · Kitchen",
+        "year": "2025",
+        "typology": "Kitchen",
+        "area": "18 m²",
+        "scope": "Joinery design, lighting, styling",
+        "palette": "Smoked oak, travertine, chalk, blackened steel",
+        "img": "warm-kitchen",
+        "widths": [1800, 1200, 800],
+        "w": 1800, "h": 1200,
+        "alt": "Modern wooden kitchen with oak cabinets, stone worktop and warm neutral finishes",
+        "intro": "Oak cabinetry and a long stone worktop make a small kitchen feel generous — a room built around the daily ritual of cooking.",
+        "body": [
+            "The plan is simple: one continuous run of oak joinery, a deep worktop in honed stone, and open shelving where the everyday things can be seen and reached. Nothing is hidden that deserves to be used.",
+            "Warm task lighting sits under the upper cabinets; a single pendant marks the prep zone. The palette stays close to the materials themselves — wood, stone, chalky plaster — so the room ages rather than dates.",
+        ],
+        "captions": ["Oak joinery and honed stone", "The working edge, in detail"],
+        "card": "half",
+    },
+    {
+        "slug": "reading-nook",
+        "title": "Reading Nook",
+        "plain": "Reading Nook",
+        "category": "Visual study · Study",
+        "year": "2026",
+        "typology": "Study corner",
+        "area": "9 m²",
+        "scope": "3D visualisation, spatial study",
+        "palette": "Linen, sage, oak, brass",
+        "img": "reading-nook",
+        "widths": [1280, 800],
+        "w": 1280, "h": 720,
+        "alt": "3D render of a reading nook with a linen armchair, brass side table and full bookshelf",
+        "intro": "A quiet corner for one: a linen armchair, a low brass table and a wall of books — modelled and rendered as a spatial study.",
+        "body": [
+            "This study asks how little a room needs. A chair, a light, a surface for a cup, and enough books to make the walls feel inhabited. The answer is not much — but each object has to earn its place.",
+            "The palette moves between linen, sage and oak, with brass only where the hand might rest. Rendered in Blender with warm, low contrast lighting to test how the corner would feel at the end of the day.",
+        ],
+        "captions": ["The corner in warm evening light", "Books, brass and a place to sit"],
+        "card": "half",
+    },
+    {
+        "slug": "dining-corner",
+        "title": "Dining Corner",
+        "plain": "Dining Corner",
+        "category": "Visual study · Dining",
+        "year": "2026",
+        "typology": "Dining",
+        "area": "20 m²",
+        "scope": "3D visualisation, layout, lighting",
+        "palette": "Oak, terracotta, sage, warm white",
+        "img": "dining-corner",
+        "widths": [1280, 800],
+        "w": 1280, "h": 720,
+        "alt": "3D render of a warm dining corner with an oak table, pendant light and terracotta accents",
+        "intro": "An oak table under a single pendant — a dining corner designed for slow evenings and long lunches.",
+        "body": [
+            "A round of chairs, one generous table and a pendant hung low enough to pool light on the surface. The sideboard holds the things a dining room accumulates: bowls, candles, a vase that is usually empty.",
+            "Terracotta and sage keep the room from becoming too polite. The study was rendered in Blender to test proportion and the warmth of the light before committing to materials.",
+        ],
+        "captions": ["Oak, terracotta and pooled light", "The sideboard, dressed simply"],
+        "card": "full",
+    },
+]
+
+ICON_ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>'
+ICON_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>'
+ICON_LEFT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M19 12H5m0 0l6-6m-6 6l6 6"/></svg>'
+ICON_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20V4m0 0l-6 6m6-6l6 6"/></svg>'
+
+
+def head(title, desc, image, rel="", canonical=""):
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{title}</title>
+<meta name="description" content="{escape(desc)}">
+<meta name="theme-color" content="#f7f2ea">
+<link rel="canonical" href="{BASE}/{canonical}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{SITE}">
+<meta property="og:title" content="{title}">
+<meta property="og:description" content="{escape(desc)}">
+<meta property="og:image" content="{BASE}/assets/img/{image}">
+<meta property="og:url" content="{BASE}/{canonical}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@{X_HANDLE}">
+<meta name="twitter:title" content="{title}">
+<meta name="twitter:description" content="{escape(desc)}">
+<meta name="twitter:image" content="{BASE}/assets/img/{image}">
+<link rel="icon" href="{rel}assets/favicon.svg" type="image/svg+xml">
+<script>document.documentElement.classList.add("js");</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Manrope:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{rel}assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+"""
+
+
+def header(rel="", current=""):
+    links = [
+        ("#work", "Work", "work"),
+        ("#studio", "Studio", "studio"),
+        ("#process", "Process", "process"),
+        ("#contact", "Contact", "contact"),
+    ]
+    parts = []
+    for h, label, key in links:
+        active = ' aria-current="page"' if current == key else ""
+        parts.append(f'<a href="{rel}index.html{h}"{active}>{label}</a>')
+    nav = "".join(parts)
+    return f"""<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="{rel}index.html">
+      <span class="mark" aria-hidden="true">N</span>
+      <span class="name">{SITE}</span>
+    </a>
+    <button class="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav"><span></span></button>
+    <nav class="nav" id="nav" aria-label="Main">
+      {nav}
+      <a class="cta" href="mailto:{EMAIL}">Start a project</a>
+    </nav>
+  </div>
+</header>
+"""
+
+
+def footer(rel=""):
+    return f"""<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© <span data-year>2026</span> {SITE} · Interior design &amp; spatial styling</span>
+    <a class="to-top" href="#top">Back to top {ICON_UP}</a>
+  </div>
+</footer>
+<script src="{rel}assets/js/main.js" defer></script>
+</body>
+</html>
+"""
+
+
+def card(p, index):
+    cls = {
+        "wide": "card--wide",
+        "narrow": "card--narrow",
+        "half": "card--half",
+        "full": "card--full",
+    }[p["card"]]
+    sizes = "(max-width:760px) 100vw, 60vw" if p["card"] in ("wide", "full") else "(max-width:760px) 100vw, 45vw"
+    if p["card"] == "full":
+        sizes = "(max-width:760px) 100vw, 100vw"
+    widths = p.get("widths", [1800, 1200, 800])
+    main = max(widths)
+    srcset = ", ".join(f"assets/img/{p['img']}-{w}.webp {w}w" for w in widths)
+    return f"""<a class="card {cls} reveal" href="work/{p['slug']}.html" data-delay="{index % 3}">
+  <div class="card-media">
+    <span class="card-index">{index + 1:02d}</span>
+    <img src="assets/img/{p['img']}-{main}.webp"
+         srcset="{srcset}"
+         sizes="{sizes}" width="{p['w']}" height="{p['h']}"
+         alt="{escape(p['alt'])}" loading="lazy" decoding="async">
+  </div>
+  <div class="card-meta">
+    <h3>{p['title']}</h3>
+    <span>{p['category']} · {p['year']}</span>
+  </div>
+</a>"""
+
+
+def index():
+    cards = "\n".join(card(p, i) for i, p in enumerate(PROJECTS))
+    ticker_items = [
+        "Residential interiors", "Material palettes", "Spatial planning",
+        "Styling", "3D visualisation", "Warm minimalism",
+    ]
+    ticker = "".join(f"<span>{t}</span>" for t in ticker_items)
+    html = head(
+        f"{SITE} — Interior design & spatial styling",
+        "Warm, quiet interiors shaped by natural materials, honest light and the way people live. Selected work by Nkugwa Mark William, Kampala.",
+        "oak-and-light-og.webp",
+    )
+    html += header()
+    html += f"""<main id="main">
+<section class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow reveal">Interior design &amp; spatial styling — Kampala</span>
+      <h1 class="reveal" data-delay="1">Spaces that feel like a <em>deep breath.</em></h1>
+      <p class="lede reveal" data-delay="2">Warm, quiet interiors shaped by natural materials, honest light and the way people actually live. Selected work and visual studies by {SITE}.</p>
+      <div class="hero-actions reveal" data-delay="3">
+        <a class="btn btn-dark" href="#work">View selected work {ICON_DOWN}</a>
+        <a class="btn btn-ghost" href="#contact">Start a project {ICON_ARROW}</a>
+      </div>
+      <div class="hero-meta reveal" data-delay="3">
+        <div><strong>05</strong>Selected studies</div>
+        <div><strong>02</strong>Disciplines</div>
+        <div><strong>KLA</strong>Kampala, Uganda</div>
+      </div>
+    </div>
+    <div class="hero-visual reveal" data-delay="2">
+      <div class="arch">
+        <img src="assets/img/oak-and-light-1200.webp"
+             srcset="assets/img/oak-and-light-800.webp 800w, assets/img/oak-and-light-1200.webp 1200w, assets/img/oak-and-light-1800.webp 1800w"
+             sizes="(max-width:1000px) 90vw, 44vw" width="1800" height="1000"
+             alt="Warm minimal living room with linen sofa, oak floor and soft daylight" fetchpriority="high" decoding="async">
+      </div>
+      <div class="hero-note"><strong>Oak &amp; Light</strong>Residential living room, 2026</div>
+    </div>
+  </div>
+</section>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">{ticker}{ticker}</div>
+</div>
+
+<section class="section" id="work">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow reveal">Selected work</span>
+        <h2 class="reveal" data-delay="1">A quiet collection of rooms</h2>
+      </div>
+      <p class="reveal" data-delay="2">Residential interiors and visual studies, each built around light, texture and a restrained palette.</p>
+    </div>
+    <div class="work-grid">
+      {cards}
+    </div>
+  </div>
+</section>
+
+<section class="section about" id="studio">
+  <div class="wrap about-grid">
+    <div class="about-figure reveal">
+      <img src="assets/img/reading-nook-1280.webp"
+           srcset="assets/img/reading-nook-800.webp 800w, assets/img/reading-nook-1280.webp 1280w"
+           sizes="(max-width:1000px) 80vw, 38vw" width="1280" height="720"
+           alt="Reading nook with linen armchair, bookshelf and warm lamp light" loading="lazy" decoding="async">
+      <span class="tag">Kampala · Uganda</span>
+    </div>
+    <div class="about-copy">
+      <span class="eyebrow reveal">The studio</span>
+      <h2 class="reveal" data-delay="1">Considered rooms, made to be lived in.</h2>
+      <p class="reveal" data-delay="2">I am {SITE}, an interior designer and spatial storyteller working between Kampala and the wider East African region. My work begins with how a room is used — where the light lands, where people pause, what the space should feel like at seven in the morning and again at nine at night.</p>
+      <p class="reveal" data-delay="2">From there, the palette stays disciplined: timber, stone, linen, clay and a little brass. Rooms are allowed to be quiet, and to age well.</p>
+      <blockquote class="big-quote reveal" data-delay="3">“Good interiors do not ask for attention. They give it back.”</blockquote>
+      <div class="services reveal" data-delay="3">
+        <div><span>Interior design</span><span>Concept to install</span></div>
+        <div><span>Spatial planning</span><span>Layout &amp; flow</span></div>
+        <div><span>Material palettes</span><span>Sourcing</span></div>
+        <div><span>3D visualisation</span><span>Renders</span></div>
+        <div><span>Styling</span><span>Furniture &amp; objects</span></div>
+        <div><span>Art direction</span><span>Photoshoots</span></div>
+      </div>
+      <p class="reveal" data-delay="3" style="margin-top:26px"><a class="link-arrow" href="mailto:{EMAIL}">Work with me {ICON_ARROW}</a></p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="process">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow reveal">How it works</span>
+        <h2 class="reveal" data-delay="1">Four unhurried steps</h2>
+      </div>
+      <p class="reveal" data-delay="2">A simple, transparent process from first conversation to the final cushion.</p>
+    </div>
+    <div class="process-grid">
+      <article class="step reveal"><span class="num">01</span><h3>Listen</h3><p>We walk the space, talk about routines, light and the things you want to keep. No mood boards yet.</p></article>
+      <article class="step reveal" data-delay="1"><span class="num">02</span><h3>Sketch</h3><p>Layouts, material directions and a first visual study — enough to test the feeling before committing.</p></article>
+      <article class="step reveal" data-delay="2"><span class="num">03</span><h3>Refine</h3><p>Samples, joinery details, lighting and a costed schedule. We edit until only the necessary remains.</p></article>
+      <article class="step reveal" data-delay="3"><span class="num">04</span><h3>Deliver</h3><p>Procurement, installation and styling, with the room finished down to the last object.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div class="wrap contact-grid">
+    <div>
+      <span class="eyebrow reveal">Contact</span>
+      <h2 class="reveal" data-delay="1">Let’s make a room that feels like <em>you.</em></h2>
+      <p class="reveal" data-delay="2">Available for residential interiors, styling and visual studies. Share a few lines about your space and timeline.</p>
+      <a class="mail reveal" data-delay="3" href="mailto:{EMAIL}">{EMAIL}</a>
+    </div>
+    <div class="contact-side reveal" data-delay="3">
+      <div><span class="label">Based in</span>Kampala, Uganda — working across East Africa</div>
+      <div><span class="label">Elsewhere</span><div class="socials"><a href="https://x.com/{X_HANDLE}" target="_blank" rel="noopener">X / Twitter</a><a href="https://github.com/MarkNwilliam" target="_blank" rel="noopener">GitHub</a></div></div>
+      <div><span class="label">Response</span>Within two working days</div>
+    </div>
+  </div>
+</section>
+</main>
+"""
+    html += footer()
+    return html
+
+
+def project_page(p, nxt, prev, index):
+    widths = p.get("widths", [1800, 1200, 800])
+    main = max(widths)
+    srcset = ", ".join(f"../assets/img/{p['img']}-{w}.webp {w}w" for w in widths)
+    gallery = f"""<div class="gallery">
+  <figure class="wide reveal">
+    <span class="lightbox-trigger" data-full="../assets/img/{p['img']}-{main}.webp">
+      <img src="../assets/img/{p['img']}-{main}.webp" srcset="{srcset}" sizes="100vw" width="{p['w']}" height="{p['h']}" alt="{escape(p['alt'])}" loading="lazy" decoding="async">
+    </span>
+    <figcaption>{p['captions'][0]}</figcaption>
+  </figure>
+  <figure class="tall reveal" data-delay="1">
+    <span class="lightbox-trigger" data-full="../assets/img/{p['img']}-detail-a.webp">
+      <img src="../assets/img/{p['img']}-detail-a.webp" width="800" height="1000" alt="Detail view — {escape(p['plain'])}" loading="lazy" decoding="async">
+    </span>
+    <figcaption>{p['captions'][1]}</figcaption>
+  </figure>
+  <figure class="tall reveal" data-delay="2">
+    <span class="lightbox-trigger" data-full="../assets/img/{p['img']}-detail-b.webp">
+      <img src="../assets/img/{p['img']}-detail-b.webp" width="800" height="1000" alt="Second detail view — {escape(p['plain'])}" loading="lazy" decoding="async">
+    </span>
+    <figcaption>Materials and light, up close</figcaption>
+  </figure>
+</div>"""
+    body = "".join(f"<p>{escape(par)}</p>" for par in p["body"])
+    html = head(
+        f"{p['plain']} — {SITE}",
+        p["intro"],
+        f"{p['img']}-og.webp",
+        rel="../",
+        canonical=f"work/{p['slug']}.html",
+    )
+    html += header(rel="../")
+    html += f"""<main id="main">
+<section class="project-hero">
+  <div class="wrap">
+    <a class="back" href="../index.html#work">{ICON_LEFT} All work</a>
+    <div class="project-intro">
+      <div>
+        <span class="eyebrow" style="margin-top:26px;display:inline-flex">{p['category']} · {p['year']}</span>
+        <h1 class="project-title">{p['title']}</h1>
+      </div>
+      <p>{p['intro']}</p>
+    </div>
+    <div class="project-main">
+      <img src="../assets/img/{p['img']}-{main}.webp" width="{p['w']}" height="{p['h']}" alt="{escape(p['alt'])}" fetchpriority="high" decoding="async">
+    </div>
+    <div class="project-meta">
+      <div><span class="label">Typology</span><span class="value">{p['typology']}</span></div>
+      <div><span class="label">Year</span><span class="value">{p['year']}</span></div>
+      <div><span class="label">Area</span><span class="value">{p['area']}</span></div>
+      <div><span class="label">Palette</span><span class="value">{p['palette']}</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap project-body">
+  <h2 class="reveal">A room built around light, texture and restraint.</h2>
+  <div class="prose reveal" data-delay="1">{body}</div>
+</section>
+
+<section class="wrap">{gallery}</section>
+
+<a class="next" href="{nxt['slug']}.html">
+  <div class="wrap">
+    <span class="eyebrow">Next project</span>
+    <h2>{nxt['title']} {ICON_ARROW}</h2>
+  </div>
+</a>
+</main>
+"""
+    html += footer(rel="../")
+    return html
+
+
+def main():
+    os.makedirs(os.path.join(ROOT, "work"), exist_ok=True)
+    with open(os.path.join(ROOT, "index.html"), "w", encoding="utf-8") as f:
+        f.write(index())
+    for i, p in enumerate(PROJECTS):
+        nxt = PROJECTS[(i + 1) % len(PROJECTS)]
+        prev = PROJECTS[(i - 1) % len(PROJECTS)]
+        with open(os.path.join(ROOT, "work", p["slug"] + ".html"), "w", encoding="utf-8") as f:
+            f.write(project_page(p, nxt, prev, i))
+    urls = [""] + [f"work/{p['slug']}.html" for p in PROJECTS]
+    sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    for u in urls:
+        sitemap += f"  <url><loc>{BASE}/{u}</loc></url>\n"
+    sitemap += "</urlset>\n"
+    with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
+        f.write(sitemap)
+    with open(os.path.join(ROOT, "robots.txt"), "w", encoding="utf-8") as f:
+        f.write(f"User-agent: *\nAllow: /\nSitemap: {BASE}/sitemap.xml\n")
+    print("Built", len(urls), "pages")
+
+
+if __name__ == "__main__":
+    main()

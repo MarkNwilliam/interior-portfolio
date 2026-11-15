@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://marknwilliam.github.io/interior-portfolio/sitemap.xml
