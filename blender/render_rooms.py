@@ -48,6 +48,11 @@ def mat(name, color, rough=0.6, metal=0.0, emission=None, strength=0.0):
     return m
 
 
+def rot_xy(x, y, angle):
+    c, s = math.cos(angle), math.sin(angle)
+    return (x * c - y * s, x * s + y * c)
+
+
 def box(name, size, loc, material, rot=(0, 0, 0), bevel=0.0):
     bpy.ops.mesh.primitive_cube_add(size=1, location=loc, rotation=rot)
     o = bpy.context.object
@@ -184,33 +189,48 @@ def plant(name, loc, scale, p):
 
 def bookshelf(name, loc, rot_z, p):
     w, h, d = 1.15, 1.7, 0.32
-    box(name + " back", (w, 0.03, h), (loc[0], loc[1] + d / 2 - 0.02, loc[2] + h / 2), p["oak_dark"], rot=(0, 0, rot_z))
+
+    def part(label, size, lx, ly, lz, material, bevel=0.0):
+        wx, wy = rot_xy(lx, ly, rot_z)
+        return box(name + " " + label, size, (loc[0] + wx, loc[1] + wy, loc[2] + lz),
+                   material, rot=(0, 0, rot_z), bevel=bevel)
+
+    part("back", (w, 0.03, h), 0, d / 2 - 0.02, h / 2, p["oak_dark"])
     for i in (-1, 1):
-        box(name + " side", (0.04, d, h), (loc[0] + i * (w / 2), loc[1], loc[2] + h / 2), p["oak"], rot=(0, 0, rot_z))
+        part("side", (0.04, d, h), i * (w / 2), 0, h / 2, p["oak"])
     for k in range(4):
-        z = loc[2] + 0.06 + k * 0.42
-        box(name + " shelf", (w, d, 0.035), (loc[0], loc[1], z), p["oak"], rot=(0, 0, rot_z))
+        z = 0.06 + k * 0.42
+        part("shelf", (w, d, 0.035), 0, 0, z, p["oak"])
         x = -w / 2 + 0.08
         idx = 0
         while x < w / 2 - 0.1:
             bw = 0.035 + 0.015 * ((idx + k) % 3)
             bh = 0.22 + 0.06 * ((idx + k) % 4)
             color = ["terracotta", "sage", "cream_deep", "charcoal", "oak_dark"][(idx + k) % 5]
-            box(name + " book", (bw, 0.18, bh), (loc[0] + x, loc[1], z + bh / 2 + 0.02), p[color], rot=(0, 0, rot_z))
+            part("book", (bw, 0.18, bh), x, 0, z + bh / 2 + 0.02, p[color])
             x += bw + 0.012
             idx += 1
 
 
 def armchair(name, loc, rot_z, p):
-    box(name + " seat", (0.78, 0.72, 0.20), (loc[0], loc[1], 0.42), p["linen"], rot=(0, 0, rot_z), bevel=0.06)
-    box(name + " back", (0.78, 0.16, 0.62), (loc[0], loc[1] + 0.30, 0.68), p["linen"], rot=(math.radians(-8), 0, rot_z), bevel=0.06)
-    box(name + " cushion", (0.60, 0.14, 0.34), (loc[0], loc[1] + 0.16, 0.60), p["sage"], rot=(math.radians(-10), 0, rot_z), bevel=0.07)
+    def part(label, size, lx, ly, lz, material, tilt=0.0, bevel=0.0):
+        wx, wy = rot_xy(lx, ly, rot_z)
+        return box(name + " " + label, size, (loc[0] + wx, loc[1] + wy, lz),
+                   material, rot=(tilt, 0, rot_z), bevel=bevel)
+
+    # 450 mm seat top, 580 mm seat depth, 880 mm overall width, 870 mm back top
+    part("seat", (0.64, 0.58, 0.14), 0, 0, 0.38, p["linen"], bevel=0.05)
+    part("back", (0.64, 0.12, 0.42), 0, 0.24, 0.66, p["linen"], tilt=math.radians(-10), bevel=0.05)
+    part("cushion", (0.50, 0.12, 0.32), 0, 0.14, 0.60, p["sage"], tilt=math.radians(-12), bevel=0.06)
     for i in (-1, 1):
-        box(name + " arm", (0.14, 0.72, 0.34), (loc[0] + i * 0.36, loc[1], 0.53), p["cream_deep"], rot=(0, 0, rot_z), bevel=0.05)
+        part("arm", (0.12, 0.62, 0.20), i * 0.34, 0, 0.53, p["cream_deep"], bevel=0.04)
+    for lx, ly in [(-0.25, -0.21), (0.25, -0.21), (-0.25, 0.21), (0.25, 0.21)]:
+        wx, wy = rot_xy(lx, ly, rot_z)
+        cyl(name + " leg", 0.024, 0.31, (loc[0] + wx, loc[1] + wy, 0.155), p["oak_dark"], vertices=20)
 
 
-def rug(name, loc, w, d, material):
-    box(name, (w, d, 0.015), (loc[0], loc[1], 0.008), material, bevel=0.004)
+def rug(name, loc, w, d, material, z=0.008):
+    box(name, (w, d, 0.015), (loc[0], loc[1], z), material, bevel=0.004)
 
 
 def setup_render(cam_loc, cam_target, lens, path, samples=28):
@@ -248,42 +268,45 @@ def room(w, d, p):
 
 
 def window(name, loc, w, h, p):
-    box(name + " glow", (w, h, 0.02), (loc[0], loc[1] + 0.02, loc[2]), p["glass"])
-    box(name + " frame top", (w + 0.1, 0.07, 0.07), (loc[0], loc[1], loc[2] + h / 2), p["white"])
-    box(name + " frame bottom", (w + 0.1, 0.07, 0.07), (loc[0], loc[1], loc[2] - h / 2), p["white"])
+    face = loc[1]
+    box(name + " glow", (w, 0.02, h), (loc[0], face - 0.02, loc[2]), p["glass"])
+    box(name + " frame top", (w + 0.1, 0.07, 0.07), (loc[0], face - 0.05, loc[2] + h / 2), p["white"])
+    box(name + " frame bottom", (w + 0.1, 0.07, 0.07), (loc[0], face - 0.05, loc[2] - h / 2), p["white"])
     for i in (-1, 1):
-        box(name + " frame side", (0.07, 0.07, h), (loc[0] + i * w / 2, loc[1], loc[2]), p["white"])
-    box(name + " mullion", (0.045, 0.06, h), (loc[0], loc[1], loc[2]), p["white"])
+        box(name + " frame side", (0.07, 0.07, h), (loc[0] + i * w / 2, face - 0.05, loc[2]), p["white"])
+    box(name + " mullion", (0.045, 0.06, h), (loc[0], face - 0.045, loc[2]), p["white"])
 
 
 def reading_nook():
     clear()
     p = palette()
     room(5.0, 4.0, p)
-    rug("Rug", (0.1, 0.1), 2.4, 1.9, p["cream_deep"])
-    window("Window", (0.9, 1.94, 1.65), 1.5, 1.6, p)
-    area("Window key", (0.9, 1.75, 1.8), (0.0, -0.2, 0.9), 480, 2.2, (1.0, 0.9, 0.78))
+    rug("Rug", (-0.5, 0.15), 2.6, 2.0, p["cream_deep"])
+    window("Window", (0.9, 1.94, 1.7), 1.7, 1.7, p)
+    area("Window key", (0.9, 1.75, 1.9), (0.0, -0.2, 0.9), 480, 2.4, (1.0, 0.9, 0.78))
     area("Fill", (-1.0, -1.2, 2.5), (0.2, 0.6, 0.8), 120, 3.0, (1.0, 0.95, 0.9))
-    point("Warm corner", (-2.0, 1.4, 2.1), 70, (1.0, 0.72, 0.45), 0.1)
+    point("Warm corner", (-1.85, -0.25, 1.5), 60, (1.0, 0.72, 0.45), 0.1)
 
     armchair("Chair", (-1.15, 0.35), math.radians(28), p)
-    rug("Chair throw", (-1.15, 0.35), 1.5, 1.3, p["sage"])
-    cyl("Table top", 0.28, 0.05, (0.0, 0.95, 0.52), p["oak"])
-    cyl("Table stem", 0.035, 0.48, (0.0, 0.95, 0.25), p["brass"])
-    cyl("Table base", 0.16, 0.03, (0.0, 0.95, 0.02), p["brass"])
-    cyl("Vase", 0.055, 0.2, (0.0, 0.95, 0.65), p["terracotta"])
-    sphere("Vase bloom", 0.07, (0.0, 0.95, 0.82), p["sage"], scale=(1, 1, 1.2))
+    rug("Chair throw", (-1.15, 0.35), 1.5, 1.3, p["sage"], z=0.024)
 
-    cyl("Lamp pole", 0.018, 1.55, (-2.05, -0.2, 0.78), p["charcoal"])
-    cone("Lamp shade", 0.24, 0.12, 0.3, (-2.05, -0.2, 1.58), p["lamp"])
-    point("Lamp light", (-2.05, -0.2, 1.5), 60, (1.0, 0.68, 0.4), 0.12)
-    cyl("Lamp base", 0.16, 0.03, (-2.05, -0.2, 0.015), p["charcoal"])
+    # 545 mm side table, 450 mm top, within arm's reach of the chair
+    cyl("Table top", 0.225, 0.035, (-0.55, 0.55, 0.5275), p["oak"])
+    cyl("Table stem", 0.03, 0.48, (-0.55, 0.55, 0.27), p["brass"])
+    cyl("Table base", 0.14, 0.025, (-0.55, 0.55, 0.0125), p["brass"])
+    cyl("Vase", 0.05, 0.18, (-0.55, 0.55, 0.645), p["terracotta"])
+    sphere("Vase bloom", 0.06, (-0.55, 0.55, 0.795), p["sage"], scale=(1, 1, 1.2))
 
-    bookshelf("Shelf", (-2.35, 0.4, 0.0), math.radians(90), p)
+    cyl("Lamp pole", 0.016, 1.55, (-1.85, -0.25, 0.775), p["charcoal"])
+    cone("Lamp shade", 0.22, 0.11, 0.3, (-1.85, -0.25, 1.58), p["lamp"])
+    point("Lamp light", (-1.85, -0.25, 1.48), 60, (1.0, 0.68, 0.4), 0.12)
+    cyl("Lamp base", 0.15, 0.025, (-1.85, -0.25, 0.0125), p["charcoal"])
+
+    bookshelf("Shelf", (-2.26, 0.4, 0.0), math.radians(90), p)
     plant("Plant", (2.05, 1.5, 0.0), 1.35, p)
-    art_frame("Art A", (-1.55, 1.92, 1.85), (math.radians(90), 0, 0), 0.55, 0.7, p["art1"], p, wall_y=1.985)
-    box("Art C frame", (0.42, 0.03, 0.52), (1.9, 1.985, 1.9), p["oak_dark"], rot=(math.radians(90), 0, 0))
-    box("Art C canvas", (0.36, 0.012, 0.46), (1.9, 1.997, 1.9), p["art2"], rot=(math.radians(90), 0, 0))
+    art_frame("Art A", (-1.55, 1.925, 1.5), (0, 0, 0), 0.55, 0.7, p["art1"], p, wall_y=1.907)
+    box("Art C frame", (0.42, 0.03, 0.52), (1.9, 1.925, 1.5), p["oak_dark"])
+    box("Art C canvas", (0.36, 0.012, 0.46), (1.9, 1.907, 1.5), p["art2"])
 
     setup_render((3.9, -3.1, 1.65), (-0.35, 0.35, 1.05), 33,
                  os.path.join(RENDERS, "reading-nook.png"))
@@ -293,46 +316,211 @@ def dining_corner():
     clear()
     p = palette()
     room(5.0, 4.2, p)
-    rug("Dining rug", (0.0, 0.15), 2.8, 2.0, p["cream_deep"])
+    rug("Dining rug", (0.0, 0.15), 2.8, 2.2, p["cream_deep"])
     window("Window", (0.6, 2.04, 1.7), 1.7, 1.7, p)
-    area("Window key", (0.6, 1.85, 1.85), (0.0, -0.2, 0.9), 520, 2.4, (1.0, 0.9, 0.78))
+    area("Window key", (0.6, 1.85, 1.9), (0.0, -0.2, 0.9), 520, 2.4, (1.0, 0.9, 0.78))
     area("Fill", (-1.4, -1.4, 2.5), (0.3, 0.5, 0.8), 110, 3.0, (1.0, 0.95, 0.9))
-    point("Pendant light", (0.0, 0.15, 2.02), 85, (1.0, 0.72, 0.45), 0.15)
+    point("Pendant light", (0.0, 0.15, 1.55), 85, (1.0, 0.72, 0.45), 0.15)
 
-    box("Table top", (1.9, 0.95, 0.06), (0.0, 0.15, 0.75), p["oak"], bevel=0.01)
+    # 1800 x 900 mm table, 750 mm top; seats 450 mm -> 300 mm thigh clearance
+    box("Table top", (1.8, 0.9, 0.06), (0.0, 0.15, 0.72), p["oak"], bevel=0.01)
     for sx in (-1, 1):
         for sy in (-1, 1):
-            cyl("Table leg", 0.035, 0.72, (sx * 0.8, 0.15 + sy * 0.34, 0.36), p["oak_dark"])
-    for i, (x, y, rz) in enumerate([(-0.62, -0.62, 0), (0.62, -0.62, 0), (-0.62, 0.92, 180), (0.62, 0.92, 180)]):
-        box("Chair seat %d" % i, (0.44, 0.44, 0.05), (x, y, 0.46), p["oak"], rot=(0, 0, math.radians(rz)), bevel=0.01)
-        box("Chair back %d" % i, (0.44, 0.05, 0.48), (x, y + (0.19 if rz == 0 else -0.19), 0.72), p["oak"], rot=(0, 0, math.radians(rz)), bevel=0.01)
+            cyl("Table leg", 0.035, 0.69, (sx * 0.75, 0.15 + sy * 0.31, 0.345), p["oak_dark"])
+    # chairs at 450 mm, 190 mm back offset, 900 mm pull-out behind
+    for i, (x, y, rz) in enumerate([(-0.6, -0.55, 0), (0.6, -0.55, 0), (-0.6, 0.85, 180), (0.6, 0.85, 180)]):
+        box("Chair seat %d" % i, (0.44, 0.44, 0.05), (x, y, 0.425), p["oak"], rot=(0, 0, math.radians(rz)), bevel=0.01)
+        box("Chair back %d" % i, (0.44, 0.05, 0.45), (x, y + (-0.19 if rz == 0 else 0.19), 0.675), p["oak"], rot=(0, 0, math.radians(rz)), bevel=0.01)
         for lx, ly in [(-0.18, -0.18), (0.18, -0.18), (-0.18, 0.18), (0.18, 0.18)]:
-            cyl("Chair leg %d" % i, 0.018, 0.46, (x + lx, y + ly, 0.23), p["oak_dark"])
+            cyl("Chair leg %d" % i, 0.017, 0.45, (x + lx, y + ly, 0.225), p["oak_dark"], vertices=20)
 
-    cyl("Pendant cord", 0.008, 0.72, (0.0, 0.15, 2.46), p["charcoal"])
-    cone("Pendant shade", 0.24, 0.09, 0.22, (0.0, 0.15, 2.05), p["lamp"])
+    # pendant 750 mm above the tabletop, shade about half the table width
+    cyl("Pendant cord", 0.008, 1.14, (0.0, 0.15, 2.29), p["charcoal"])
+    cone("Pendant shade", 0.22, 0.09, 0.22, (0.0, 0.15, 1.61), p["lamp"])
 
-    cyl("Vase tall", 0.07, 0.32, (0.0, 0.15, 0.94), p["terracotta"])
-    sphere("Branch", 0.12, (0.05, 0.15, 1.18), p["sage"], scale=(0.7, 0.7, 1.3))
+    cyl("Vase tall", 0.07, 0.30, (0.0, 0.15, 0.90), p["terracotta"])
+    sphere("Branch", 0.11, (0.05, 0.15, 1.12), p["sage"], scale=(0.7, 0.7, 1.3))
 
-    box("Sideboard", (1.5, 0.4, 0.62), (-1.85, 1.05, 0.31), p["oak"], bevel=0.015)
-    box("Sideboard top", (1.54, 0.44, 0.03), (-1.85, 1.05, 0.635), p["oak_dark"])
-    cyl("Bowl", 0.13, 0.09, (-1.55, 1.05, 0.7), p["cream"])
+    box("Sideboard", (1.4, 0.4, 0.62), (-1.62, 1.82, 0.31), p["oak"], bevel=0.015)
+    box("Sideboard top", (1.44, 0.44, 0.03), (-1.62, 1.82, 0.635), p["oak_dark"])
+    cyl("Bowl", 0.12, 0.08, (-1.3, 1.82, 0.68), p["cream"])
     plant("Plant", (2.05, 1.55, 0.0), 1.25, p)
 
-    box("Art frame", (0.9, 0.035, 0.6), (1.5, 2.07, 1.8), p["oak_dark"])
-    box("Art canvas", (0.82, 0.012, 0.52), (1.5, 2.09, 1.8), p["art2"])
+    box("Art frame", (0.9, 0.035, 0.6), (1.5, 2.022, 1.5), p["oak_dark"])
+    box("Art canvas", (0.82, 0.012, 0.52), (1.5, 2.004, 1.5), p["art2"])
 
     setup_render((3.95, -3.2, 1.68), (-0.15, 0.2, 1.05), 35,
                  os.path.join(RENDERS, "dining-corner.png"))
 
 
-reading_nook()
-bpy.ops.wm.save_as_mainfile(filepath=os.path.join(ROOT, "blender", "reading-nook.blend"))
-bpy.ops.render.render(write_still=True)
-print("Rendered reading nook")
+def living_room():
+    clear()
+    p = palette()
+    room(5.2, 4.2, p)
+    rug("Living rug", (-0.45, 0.55), 3.4, 2.6, p["cream_deep"])
+    window("Window", (1.45, 2.04, 1.7), 1.4, 1.7, p)
+    area("Window key", (1.45, 1.85, 1.9), (0.0, -0.1, 0.9), 540, 2.2, (1.0, 0.9, 0.78))
+    area("Fill", (-1.7, -1.5, 2.5), (0.4, 0.6, 0.9), 120, 3.2, (1.0, 0.95, 0.9))
+    point("Floor lamp light", (2.05, 1.65, 1.5), 55, (1.0, 0.7, 0.45), 0.1)
 
-dining_corner()
-bpy.ops.wm.save_as_mainfile(filepath=os.path.join(ROOT, "blender", "dining-corner.blend"))
-bpy.ops.render.render(write_still=True)
-print("Rendered dining corner")
+    # 2.1 m three-seat sofa: 900 mm deep, 450 mm seat top, 910 mm back
+    box("Sofa base", (2.1, 0.9, 0.34), (-0.45, 1.35, 0.17), p["cream_deep"], bevel=0.04)
+    for sx in (-1, 1):
+        box("Sofa arm", (0.16, 0.9, 0.32), (-0.45 + sx * 0.97, 1.35, 0.50), p["cream_deep"], bevel=0.05)
+    box("Sofa back", (2.1, 0.18, 0.62), (-0.45, 1.71, 0.60), p["cream_deep"], bevel=0.05)
+    for i, dx in enumerate((-0.445, 0.445)):
+        box("Sofa cushion %d" % i, (0.86, 0.62, 0.11), (-0.45 + dx, 1.24, 0.395), p["linen"], bevel=0.05)
+    for i, dx in enumerate((-0.70, 0.0, 0.70)):
+        box("Sofa pillow %d" % i, (0.34, 0.12, 0.34), (-0.45 + dx, 1.56, 0.55), p["sage"],
+            rot=(math.radians(-8), 0, 0), bevel=0.06)
+
+    # coffee table 400 mm high, 450 mm clear of the sofa, 900 mm walkway beyond
+    box("Coffee top", (1.1, 0.6, 0.05), (-0.45, 0.15, 0.375), p["oak"], bevel=0.01)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            cyl("Coffee leg", 0.035, 0.35, (-0.45 + sx * 0.48, 0.15 + sy * 0.24, 0.175),
+                p["oak_dark"], vertices=20)
+    box("Books", (0.28, 0.20, 0.04), (-0.72, 0.10, 0.42), p["terracotta"])
+    box("Books two", (0.24, 0.17, 0.03), (-0.71, 0.11, 0.455), p["sage"], rot=(0, 0, math.radians(8)))
+    cyl("Bowl", 0.10, 0.07, (-0.10, 0.18, 0.435), p["cream"])
+
+    armchair("Armchair", (1.55, 0.55), math.radians(-120), p)
+    cyl("Side table top", 0.20, 0.03, (1.55, -0.30, 0.49), p["oak"])
+    cyl("Side table stem", 0.025, 0.46, (1.55, -0.30, 0.245), p["brass"])
+    cyl("Side table base", 0.13, 0.02, (1.55, -0.30, 0.01), p["brass"])
+
+    cyl("Floor lamp pole", 0.016, 1.55, (2.05, 1.65, 0.775), p["charcoal"])
+    cone("Floor lamp shade", 0.22, 0.11, 0.30, (2.05, 1.65, 1.58), p["lamp"])
+    cyl("Floor lamp base", 0.15, 0.025, (2.05, 1.65, 0.0125), p["charcoal"])
+
+    plant("Plant", (-2.20, 1.62, 0.0), 1.3, p)
+    # artwork centred at 1.5 m, the hanging height at eye level
+    box("Art frame", (1.25, 0.03, 0.72), (-0.45, 2.025, 1.52), p["oak_dark"])
+    box("Art canvas", (1.19, 0.012, 0.66), (-0.45, 2.007, 1.52), p["art1"])
+
+    setup_render((3.75, -3.35, 1.62), (-0.40, 0.55, 0.90), 32,
+                 os.path.join(RENDERS, "oak-and-light.png"))
+
+
+def quiet_quarters():
+    clear()
+    p = palette()
+    room(4.4, 4.2, p)
+    rug("Bedroom rug", (0.2, 0.45), 2.8, 2.0, p["cream_deep"])
+    window("Window", (1.70, 2.04, 1.70), 0.9, 1.3, p)
+    area("Window key", (1.20, 1.85, 1.7), (0.0, -0.1, 1.0), 420, 2.0, (1.0, 0.9, 0.78))
+    area("Fill", (-1.6, -1.4, 2.5), (0.4, 0.6, 0.9), 125, 3.2, (1.0, 0.95, 0.9))
+    point("Bedside glow", (1.34, 1.75, 0.78), 45, (1.0, 0.7, 0.45), 0.1)
+
+    # 1.6 x 2.0 m bed, 540 mm mattress top, 600 mm clear at both sides
+    box("Bed frame", (1.70, 2.00, 0.30), (0.20, 1.00, 0.17), p["oak_dark"], bevel=0.02)
+    box("Mattress", (1.60, 1.94, 0.22), (0.20, 1.00, 0.43), p["linen"], bevel=0.03)
+    box("Duvet", (1.62, 1.45, 0.10), (0.20, 0.72, 0.55), p["white"], bevel=0.03)
+    box("Duvet fold", (1.62, 0.35, 0.09), (0.20, 1.42, 0.58), p["cream_deep"], bevel=0.03)
+    for i, dx in enumerate((-0.40, 0.40)):
+        box("Pillow %d" % i, (0.62, 0.36, 0.16), (0.20 + dx, 1.72, 0.66), p["white"],
+            rot=(math.radians(-14), 0, 0), bevel=0.06)
+    for i in range(9):
+        box("Headboard slat %d" % i, (0.07, 0.03, 1.00), (-0.62 + i * 0.205, 1.96, 0.62), p["oak"])
+    box("Headboard rail", (1.80, 0.06, 1.10), (0.20, 2.005, 0.63), p["oak_dark"], bevel=0.01)
+
+    # 450 x 400 mm nightstands, 500 mm high, within reach of the mattress
+    for i, x in enumerate((-0.94, 1.34)):
+        box("Nightstand %d" % i, (0.45, 0.40, 0.50), (x, 1.75, 0.25), p["oak"], bevel=0.015)
+        cyl("Bedside lamp base %d" % i, 0.05, 0.03, (x, 1.75, 0.515), p["brass"])
+        cyl("Bedside lamp stem %d" % i, 0.012, 0.24, (x, 1.75, 0.64), p["brass"])
+        cone("Bedside shade %d" % i, 0.13, 0.07, 0.18, (x, 1.75, 0.85), p["lamp"])
+
+    # 600 mm deep sliding wardrobe on the left wall, 1.2 m clear of the bed
+    box("Wardrobe", (0.60, 1.80, 2.20), (-1.835, 0.55, 1.10), p["oak"], bevel=0.01)
+    box("Wardrobe door A", (0.03, 0.88, 2.15), (-1.525, 0.10, 1.10), p["oak_dark"])
+    box("Wardrobe door B", (0.03, 0.88, 2.15), (-1.520, 0.99, 1.10), p["oak_dark"])
+    for i, y in enumerate((0.50, 0.59)):
+        box("Wardrobe handle %d" % i, (0.02, 0.02, 0.34), (-1.500, y, 1.10), p["brass"])
+
+    box("Bench cushion", (1.20, 0.40, 0.12), (0.20, -0.55, 0.39), p["sage"], bevel=0.03)
+    for i, (dx, dy) in enumerate(((-0.52, -0.14), (0.52, -0.14), (-0.52, 0.14), (0.52, 0.14))):
+        cyl("Bench leg %d" % i, 0.02, 0.33, (0.20 + dx, -0.55 + dy, 0.165),
+            p["oak_dark"], vertices=16)
+
+    plant("Plant", (-1.75, -1.55, 0.0), 1.15, p)
+    setup_render((3.40, -3.35, 1.55), (0.0, 0.75, 0.95), 30,
+                 os.path.join(RENDERS, "quiet-quarters.png"))
+
+
+def warm_kitchen():
+    clear()
+    p = palette()
+    room(4.8, 3.8, p)
+    window("Window", (0.85, 1.84, 1.75), 0.9, 0.9, p)
+    area("Window key", (0.85, 1.70, 1.8), (0.1, 0.0, 0.9), 480, 2.0, (1.0, 0.9, 0.78))
+    area("Fill", (-1.6, -1.6, 2.5), (0.4, 0.5, 0.9), 115, 3.0, (1.0, 0.95, 0.9))
+    point("Island light", (0.50, -0.32, 1.72), 75, (1.0, 0.72, 0.45), 0.18)
+
+    # 900 mm worktops, 600 mm deep; work triangle about 1.6 / 1.5 / 2.7 m
+    box("Base run", (4.40, 0.60, 0.85), (0.0, 1.52, 0.425), p["oak"], bevel=0.01)
+    box("Worktop run", (4.50, 0.62, 0.05), (0.0, 1.51, 0.875), p["cream"], bevel=0.005)
+    box("Upstand", (4.50, 0.03, 0.10), (0.0, 1.82, 0.95), p["cream_deep"])
+
+    box("Fridge", (0.70, 0.68, 1.95), (-1.75, 1.44, 0.975), p["white"], bevel=0.02)
+    box("Fridge seam", (0.66, 0.01, 0.02), (-1.75, 1.095, 1.26), p["charcoal"])
+    box("Fridge handle", (0.03, 0.04, 0.50), (-1.47, 1.09, 1.55), p["brass"])
+
+    box("Range", (0.62, 0.62, 0.90), (-0.10, 1.50, 0.45), p["charcoal"], bevel=0.01)
+    box("Cooktop", (0.60, 0.50, 0.02), (-0.10, 1.52, 0.905), p["charcoal"])
+    for i, (dx, dy) in enumerate(((-0.16, -0.12), (0.16, -0.12), (-0.16, 0.12), (0.16, 0.12))):
+        cyl("Burner %d" % i, 0.07, 0.015, (-0.10 + dx, 1.52 + dy, 0.922),
+            p["oak_dark"], vertices=20)
+    box("Oven door", (0.56, 0.02, 0.42), (-0.10, 1.185, 0.42), p["oak_dark"])
+    box("Oven handle", (0.50, 0.03, 0.03), (-0.10, 1.16, 0.66), p["brass"])
+
+    box("Sink", (0.56, 0.42, 0.16), (0.95, 1.51, 0.82), p["charcoal"])
+    cyl("Tap", 0.015, 0.30, (0.95, 1.74, 1.03), p["brass"], vertices=16)
+    cyl("Tap spout", 0.012, 0.20, (0.95, 1.65, 1.16), p["brass"],
+        rot=(math.radians(90), 0, 0), vertices=16)
+
+    box("Hood", (0.60, 0.45, 0.18), (-0.10, 1.58, 1.75), p["white"], bevel=0.02)
+    box("Hood chimney", (0.22, 0.22, 0.92), (-0.10, 1.70, 2.30), p["white"])
+    box("Upper cabinet L", (1.20, 0.35, 0.72), (-1.55, 1.66, 1.86), p["oak"], bevel=0.01)
+    box("Upper cabinet R", (0.40, 0.35, 0.72), (1.65, 1.66, 1.86), p["oak"], bevel=0.01)
+
+    # 2.2 x 0.9 m island, 900 mm top, 1.1 m aisle to the back run
+    box("Island base", (2.20, 0.90, 0.85), (0.50, -0.32, 0.425), p["oak"], bevel=0.01)
+    box("Island top", (2.30, 1.00, 0.06), (0.50, -0.32, 0.88), p["cream"], bevel=0.01)
+    cyl("Island bowl", 0.14, 0.08, (0.30, -0.32, 0.95), p["terracotta"])
+    box("Cutting board", (0.42, 0.28, 0.03), (1.05, -0.28, 0.925), p["oak_dark"])
+
+    # counter stools at 650 mm seat height
+    for i, x in enumerate((-0.05, 0.50, 1.05)):
+        cyl("Stool seat %d" % i, 0.17, 0.05, (x, -1.08, 0.625), p["oak"], vertices=24)
+        for lx, ly in ((-0.11, -0.11), (0.11, -0.11), (-0.11, 0.11), (0.11, 0.11)):
+            cyl("Stool leg %d" % i, 0.012, 0.60, (x + lx, -1.08 + ly, 0.30),
+                p["charcoal"], vertices=12)
+        box("Stool back %d" % i, (0.30, 0.03, 0.22), (x, -1.24, 0.80), p["oak"], bevel=0.01)
+
+    # pendants 750 mm above the island top
+    for i, x in enumerate((-0.05, 0.50, 1.05)):
+        cyl("Pendant cord %d" % i, 0.006, 1.02, (x, -0.32, 2.35), p["charcoal"], vertices=12)
+        cone("Pendant shade %d" % i, 0.15, 0.05, 0.18, (x, -0.32, 1.75), p["lamp"])
+
+    plant("Plant", (2.10, 1.55, 0.0), 1.2, p)
+    setup_render((3.30, -3.30, 1.70), (0.15, 0.55, 1.00), 30,
+                 os.path.join(RENDERS, "warm-kitchen.png"))
+
+
+ROOMS = [
+    ("reading-nook", reading_nook),
+    ("dining-corner", dining_corner),
+    ("oak-and-light", living_room),
+    ("quiet-quarters", quiet_quarters),
+    ("warm-kitchen", warm_kitchen),
+]
+
+for name, build in ROOMS:
+    only = [s for s in os.environ.get("ROOMS_ONLY", "").split(",") if s]
+    if only and name not in only:
+        continue
+    build()
+    bpy.ops.wm.save_as_mainfile(filepath=os.path.join(ROOT, "blender", name + ".blend"))
+    bpy.ops.render.render(write_still=True)
+    print("Rendered", name)

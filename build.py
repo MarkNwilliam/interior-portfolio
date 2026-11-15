@@ -14,64 +14,67 @@ PROJECTS = [
         "slug": "oak-and-light",
         "title": "Oak &amp; Light",
         "plain": "Oak & Light",
-        "category": "Residential · Living",
+        "category": "3D study · Living",
         "year": "2026",
         "typology": "Living room",
-        "area": "48 m²",
-        "scope": "Spatial planning, material palette, styling",
-        "palette": "Oak, linen, lime wash, aged brass",
+        "area": "21.8 m²",
+        "scope": "3D visualisation, spatial planning, lighting",
+        "palette": "Oak, linen, cream, sage",
         "img": "oak-and-light",
-        "widths": [1800, 1200, 800],
-        "w": 1800, "h": 1000,
-        "alt": "Warm minimal living room with a low linen sofa, oak floor and soft afternoon light",
-        "intro": "A living room composed around a single shaft of afternoon light — oak, linen and lime-washed walls in quiet conversation.",
+        "glb": "oak-and-light",
+        "widths": [1280, 800],
+        "w": 1280, "h": 720,
+        "alt": "3D render of a warm living room with a linen sofa, oak coffee table, armchair and floor lamp",
+        "intro": "A living room modelled around one clear metre of movement — a linen sofa, an oak table and a chair that can be pulled into the light.",
         "body": [
-            "The brief asked for calm: a room that could hold a long conversation, a stack of books and nothing louder than the light. The shell stays almost silent — lime-washed walls, a pale oak floor — so texture can do the talking.",
-            "A low linen sofa sits opposite a pair of sculptural armchairs. Brass appears only at the edges: a side table, the lip of a lamp. The result is warm without being heavy, and quiet without feeling empty.",
+            "The room is 5.2 by 4.2 metres. The sofa is 2.1 metres long with a 450 mm seat height; the coffee table sits at 400 mm, 450 mm in front of it, so legs can pass without the room feeling like a corridor.",
+            "Every clearance is drawn rather than guessed: a 900 mm route around the seating, artwork centred at 1.5 metres, and a window sized above one-eighth of the floor area. The render tests the proportions before materials are committed.",
         ],
-        "captions": ["Morning light across the seating group", "Linen, oak and a single brass note"],
+        "captions": ["The seating group in warm afternoon light", "Linen, oak and a single brass note"],
         "card": "wide",
     },
     {
         "slug": "quiet-quarters",
         "title": "Quiet Quarters",
         "plain": "Quiet Quarters",
-        "category": "Residential · Bedroom",
+        "category": "3D study · Bedroom",
         "year": "2026",
         "typology": "Bedroom",
-        "area": "22 m²",
-        "scope": "Concept, layout, soft furnishing",
-        "palette": "Oat, clay, walnut, raw cotton",
+        "area": "18.5 m²",
+        "scope": "3D visualisation, layout, joinery study",
+        "palette": "Oat, linen, oak, brass",
         "img": "quiet-quarters",
-        "widths": [1800, 1200, 800],
-        "w": 1800, "h": 1200,
-        "alt": "Serene minimalist bedroom in warm neutral tones with soft natural light",
-        "intro": "A bedroom reduced to its essentials: soft light, natural fibres and a palette that feels like early morning.",
+        "glb": "quiet-quarters",
+        "widths": [1280, 800],
+        "w": 1280, "h": 720,
+        "alt": "3D render of a calm bedroom with a low bed, slatted oak headboard, nightstands and sliding wardrobe",
+        "intro": "A bedroom drawn to rest: a 1.6-metre bed with 600 mm either side, a slatted oak headboard and a wardrobe that disappears into the wall.",
         "body": [
-            "Everything that does not help the room rest was removed. The bed sits low and centred, dressed in washed cotton; a single walnut surface carries the lamp, the book, the glass of water.",
-            "Walls are held in a warm oat tone, darker than the linen so the room softens at dusk. There is no art above the bed — only shadow, and the quiet geometry of the headboard.",
+            "At 4.4 by 4.2 metres the room can hold the bed, two 450 mm nightstands and a full-height wardrobe without crowding the route to the window. The mattress sits at 540 mm — low enough to read as calm, high enough to rise from easily.",
+            "The headboard is a screen of oak slats; the wardrobe runs the left wall at 600 mm deep. Everything else is left quiet so the morning light has somewhere to land.",
         ],
-        "captions": ["Washed cotton and a low walnut ledge", "Soft light at the edge of the room"],
+        "captions": ["Washed linen and a low oak ledge", "Soft light at the edge of the room"],
         "card": "narrow",
     },
     {
         "slug": "warm-kitchen",
         "title": "The Warm Kitchen",
         "plain": "The Warm Kitchen",
-        "category": "Residential · Kitchen",
-        "year": "2025",
+        "category": "3D study · Kitchen",
+        "year": "2026",
         "typology": "Kitchen",
-        "area": "18 m²",
-        "scope": "Joinery design, lighting, styling",
-        "palette": "Smoked oak, travertine, chalk, blackened steel",
+        "area": "18.2 m²",
+        "scope": "3D visualisation, joinery design, lighting",
+        "palette": "Oak, cream, charcoal, brass",
         "img": "warm-kitchen",
-        "widths": [1800, 1200, 800],
-        "w": 1800, "h": 1200,
-        "alt": "Modern wooden kitchen with oak cabinets, stone worktop and warm neutral finishes",
-        "intro": "Oak cabinetry and a long stone worktop make a small kitchen feel generous — a room built around the daily ritual of cooking.",
+        "glb": "warm-kitchen",
+        "widths": [1280, 800],
+        "w": 1280, "h": 720,
+        "alt": "3D render of a warm oak kitchen with a stone worktop, island, stools and pendant lights",
+        "intro": "A working kitchen modelled around the work triangle — fridge, range and sink within 1.5 to 2.7 metres of one another.",
         "body": [
-            "The plan is simple: one continuous run of oak joinery, a deep worktop in honed stone, and open shelving where the everyday things can be seen and reached. Nothing is hidden that deserves to be used.",
-            "Warm task lighting sits under the upper cabinets; a single pendant marks the prep zone. The palette stays close to the materials themselves — wood, stone, chalky plaster — so the room ages rather than dates.",
+            "The back run holds 900 mm worktops over 600 mm cabinets, with the fridge, range and sink spaced to keep the work triangle compact. A 2.2-metre island sits behind a 1.1-metre aisle, close enough to pass a plate across.",
+            "Pendants hang 750 mm above the island, the height that lights the surface without blocking the view. Oak, cream and blackened steel keep the room warm rather than clinical.",
         ],
         "captions": ["Oak joinery and honed stone", "The working edge, in detail"],
         "card": "half",
@@ -80,20 +83,21 @@ PROJECTS = [
         "slug": "reading-nook",
         "title": "Reading Nook",
         "plain": "Reading Nook",
-        "category": "Visual study · Study",
+        "category": "3D study · Study",
         "year": "2026",
         "typology": "Study corner",
-        "area": "9 m²",
+        "area": "20 m²",
         "scope": "3D visualisation, spatial study",
         "palette": "Linen, sage, oak, brass",
         "img": "reading-nook",
+        "glb": "reading-nook",
         "widths": [1280, 800],
         "w": 1280, "h": 720,
         "alt": "3D render of a reading nook with a linen armchair, brass side table and full bookshelf",
-        "intro": "A quiet corner for one: a linen armchair, a low brass table and a wall of books — modelled and rendered as a spatial study.",
+        "intro": "A quiet corner modelled at full scale: a 450 mm linen armchair, a brass side table at 545 mm and a wall of books.",
         "body": [
             "This study asks how little a room needs. A chair, a light, a surface for a cup, and enough books to make the walls feel inhabited. The answer is not much — but each object has to earn its place.",
-            "The palette moves between linen, sage and oak, with brass only where the hand might rest. Rendered in Blender with warm, low contrast lighting to test how the corner would feel at the end of the day.",
+            "The seat sits at 450 mm with a 545 mm table beside it, both within reach of the window light. The palette moves between linen, sage and oak, with brass only where the hand might rest.",
         ],
         "captions": ["The corner in warm evening light", "Books, brass and a place to sit"],
         "card": "half",
@@ -102,20 +106,21 @@ PROJECTS = [
         "slug": "dining-corner",
         "title": "Dining Corner",
         "plain": "Dining Corner",
-        "category": "Visual study · Dining",
+        "category": "3D study · Dining",
         "year": "2026",
         "typology": "Dining",
-        "area": "20 m²",
+        "area": "21 m²",
         "scope": "3D visualisation, layout, lighting",
-        "palette": "Oak, terracotta, sage, warm white",
+        "palette": "Oak, terracotta, sage, cream",
         "img": "dining-corner",
+        "glb": "dining-corner",
         "widths": [1280, 800],
         "w": 1280, "h": 720,
-        "alt": "3D render of a warm dining corner with an oak table, pendant light and terracotta accents",
-        "intro": "An oak table under a single pendant — a dining corner designed for slow evenings and long lunches.",
+        "alt": "3D render of a dining room with an oak table, four chairs, low pendant and sideboard",
+        "intro": "A 1.8-metre oak table under a pendant hung 750 mm above the surface — a dining room drawn for slow evenings.",
         "body": [
-            "A round of chairs, one generous table and a pendant hung low enough to pool light on the surface. The sideboard holds the things a dining room accumulates: bowls, candles, a vase that is usually empty.",
-            "Terracotta and sage keep the room from becoming too polite. The study was rendered in Blender to test proportion and the warmth of the light before committing to materials.",
+            "Four chairs sit at 450 mm, leaving a 300 mm thigh clearance under the 750 mm tabletop and 900 mm behind each chair to pull out. The pendant pools light on the table rather than the room.",
+            "A sideboard runs the back wall, holding bowls, a vase and the things a dining room gathers. Terracotta and sage keep the oak from feeling too polite.",
         ],
         "captions": ["Oak, terracotta and pooled light", "The sideboard, dressed simply"],
         "card": "full",
@@ -155,6 +160,7 @@ def head(title, desc, image, rel="", canonical=""):
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Manrope:wght@300..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{rel}assets/css/style.css">
+<script type="importmap">{{"imports":{{"three":"{rel}assets/vendor/three.module.js","three/addons/":"{rel}assets/vendor/addons/"}}}}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -215,9 +221,10 @@ def card(p, index):
     widths = p.get("widths", [1800, 1200, 800])
     main = max(widths)
     srcset = ", ".join(f"assets/img/{p['img']}-{w}.webp {w}w" for w in widths)
+    badge = '<span class="card-3d">3D view</span>' if p.get("glb") else ""
     return f"""<a class="card {cls} reveal" href="work/{p['slug']}.html" data-delay="{index % 3}">
   <div class="card-media">
-    <span class="card-index">{index + 1:02d}</span>
+    <span class="card-index">{index + 1:02d}</span>{badge}
     <img src="assets/img/{p['img']}-{main}.webp"
          srcset="{srcset}"
          sizes="{sizes}" width="{p['w']}" height="{p['h']}"
@@ -255,19 +262,19 @@ def index():
         <a class="btn btn-ghost" href="#contact">Start a project {ICON_ARROW}</a>
       </div>
       <div class="hero-meta reveal" data-delay="3">
-        <div><strong>05</strong>Selected studies</div>
-        <div><strong>02</strong>Disciplines</div>
+        <div><strong>05</strong>3D rooms</div>
+        <div><strong>05</strong>Orbitable models</div>
         <div><strong>KLA</strong>Kampala, Uganda</div>
       </div>
     </div>
     <div class="hero-visual reveal" data-delay="2">
       <div class="arch">
-        <img src="assets/img/oak-and-light-1200.webp"
-             srcset="assets/img/oak-and-light-800.webp 800w, assets/img/oak-and-light-1200.webp 1200w, assets/img/oak-and-light-1800.webp 1800w"
-             sizes="(max-width:1000px) 90vw, 44vw" width="1800" height="1000"
-             alt="Warm minimal living room with linen sofa, oak floor and soft daylight" fetchpriority="high" decoding="async">
+        <img src="assets/img/oak-and-light-1280.webp"
+             srcset="assets/img/oak-and-light-800.webp 800w, assets/img/oak-and-light-1280.webp 1280w"
+             sizes="(max-width:1000px) 90vw, 44vw" width="1280" height="720"
+             alt="3D render of a warm living room with a linen sofa, oak coffee table and soft daylight" fetchpriority="high" decoding="async">
       </div>
-      <div class="hero-note"><strong>Oak &amp; Light</strong>Residential living room, 2026</div>
+      <div class="hero-note"><strong>Oak &amp; Light</strong>Living room · 3D study, 2026</div>
     </div>
   </div>
 </section>
@@ -283,7 +290,7 @@ def index():
         <span class="eyebrow reveal">Selected work</span>
         <h2 class="reveal" data-delay="1">A quiet collection of rooms</h2>
       </div>
-      <p class="reveal" data-delay="2">Residential interiors and visual studies, each built around light, texture and a restrained palette.</p>
+      <p class="reveal" data-delay="2">Five rooms, modelled and measured in Blender, then published as orbitable 3D models. Open any room to move around it.</p>
     </div>
     <div class="work-grid">
       {cards}
@@ -304,15 +311,15 @@ def index():
       <span class="eyebrow reveal">The studio</span>
       <h2 class="reveal" data-delay="1">Considered rooms, made to be lived in.</h2>
       <p class="reveal" data-delay="2">I am {SITE}, an interior designer and spatial storyteller working between Kampala and the wider East African region. My work begins with how a room is used — where the light lands, where people pause, what the space should feel like at seven in the morning and again at nine at night.</p>
-      <p class="reveal" data-delay="2">From there, the palette stays disciplined: timber, stone, linen, clay and a little brass. Rooms are allowed to be quiet, and to age well.</p>
+      <p class="reveal" data-delay="2">Every room is modelled at full scale and tested against researched dimensions — 450 mm seat heights, 750 mm dining tables, 900 mm worktops, 600 mm bed clearances and a compact kitchen work triangle. From there, the palette stays disciplined: timber, stone, linen, clay and a little brass.</p>
       <blockquote class="big-quote reveal" data-delay="3">“Good interiors do not ask for attention. They give it back.”</blockquote>
       <div class="services reveal" data-delay="3">
         <div><span>Interior design</span><span>Concept to install</span></div>
         <div><span>Spatial planning</span><span>Layout &amp; flow</span></div>
+        <div><span>Anthropometrics</span><span>Dimensions &amp; clearances</span></div>
         <div><span>Material palettes</span><span>Sourcing</span></div>
-        <div><span>3D visualisation</span><span>Renders</span></div>
+        <div><span>3D visualisation</span><span>Models &amp; renders</span></div>
         <div><span>Styling</span><span>Furniture &amp; objects</span></div>
-        <div><span>Art direction</span><span>Photoshoots</span></div>
       </div>
       <p class="reveal" data-delay="3" style="margin-top:26px"><a class="link-arrow" href="mailto:{EMAIL}">Work with me {ICON_ARROW}</a></p>
     </div>
@@ -358,31 +365,42 @@ def index():
     return html
 
 
+def viewer_section(p):
+    return f"""<section class="section viewer-section" id="3d">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow reveal">Interactive 3D</span>
+        <h2 class="reveal" data-delay="1">Step inside {p['plain']}</h2>
+      </div>
+      <p class="reveal" data-delay="2">A real-time model built in Blender. Drag to orbit, scroll or pinch to zoom, and open it fullscreen to look closer. Use the arrow keys to move and press 0 to reset.</p>
+    </div>
+    <div class="viewer reveal" data-3d data-model="../assets/models/{p['glb']}.glb" data-poster="../assets/img/{p['img']}-1280.webp" data-name="{escape(p['plain'])}">
+      <div class="viewer-stage" tabindex="0" role="application" aria-label="Interactive 3D model of {escape(p['plain'])}. Drag to orbit, scroll to zoom, or use the arrow keys. Press 0 to reset.">
+        <img class="viewer-poster" src="../assets/img/{p['img']}-1280.webp" width="1280" height="720" alt="{escape(p['alt'])}" loading="lazy" decoding="async">
+        <div class="viewer-loader" role="status" data-viewer-loader><span>Loading 3D model</span><span class="viewer-bar"><i></i></span></div>
+        <div class="viewer-error" role="alert" data-viewer-error hidden><span>3D preview unavailable — the render above still shows the room.</span></div>
+      </div>
+      <div class="viewer-toolbar">
+        <span class="viewer-hint">Drag to orbit · Scroll to zoom</span>
+        <div class="viewer-actions">
+          <button type="button" data-viewer-rotate aria-pressed="true" disabled>Auto-rotate: on</button>
+          <button type="button" data-viewer-reset disabled>Reset view</button>
+          <button type="button" data-viewer-fullscreen disabled>Fullscreen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script type="module" src="../assets/js/viewer3d.js"></script>"""
+
+
 def project_page(p, nxt, prev, index):
-    widths = p.get("widths", [1800, 1200, 800])
+    widths = p.get("widths", [1280, 800])
     main = max(widths)
-    srcset = ", ".join(f"../assets/img/{p['img']}-{w}.webp {w}w" for w in widths)
-    gallery = f"""<div class="gallery">
-  <figure class="wide reveal">
-    <span class="lightbox-trigger" data-full="../assets/img/{p['img']}-{main}.webp">
-      <img src="../assets/img/{p['img']}-{main}.webp" srcset="{srcset}" sizes="100vw" width="{p['w']}" height="{p['h']}" alt="{escape(p['alt'])}" loading="lazy" decoding="async">
-    </span>
-    <figcaption>{p['captions'][0]}</figcaption>
-  </figure>
-  <figure class="tall reveal" data-delay="1">
-    <span class="lightbox-trigger" data-full="../assets/img/{p['img']}-detail-a.webp">
-      <img src="../assets/img/{p['img']}-detail-a.webp" width="800" height="1000" alt="Detail view — {escape(p['plain'])}" loading="lazy" decoding="async">
-    </span>
-    <figcaption>{p['captions'][1]}</figcaption>
-  </figure>
-  <figure class="tall reveal" data-delay="2">
-    <span class="lightbox-trigger" data-full="../assets/img/{p['img']}-detail-b.webp">
-      <img src="../assets/img/{p['img']}-detail-b.webp" width="800" height="1000" alt="Second detail view — {escape(p['plain'])}" loading="lazy" decoding="async">
-    </span>
-    <figcaption>Materials and light, up close</figcaption>
-  </figure>
-</div>"""
     body = "".join(f"<p>{escape(par)}</p>" for par in p["body"])
+    viewer = viewer_section(p) if p.get("glb") else ""
+    chip = '<a class="project-chip" href="#3d">Explore in 3D</a>' if p.get("glb") else ""
     html = head(
         f"{p['plain']} — {SITE}",
         p["intro"],
@@ -398,7 +416,7 @@ def project_page(p, nxt, prev, index):
     <div class="project-intro">
       <div>
         <span class="eyebrow" style="margin-top:26px;display:inline-flex">{p['category']} · {p['year']}</span>
-        <h1 class="project-title">{p['title']}</h1>
+        <h1 class="project-title">{p['title']}</h1>{chip}
       </div>
       <p>{p['intro']}</p>
     </div>
@@ -415,11 +433,11 @@ def project_page(p, nxt, prev, index):
 </section>
 
 <section class="wrap project-body">
-  <h2 class="reveal">A room built around light, texture and restraint.</h2>
+  <h2 class="reveal">Modelled at full scale, finished in light.</h2>
   <div class="prose reveal" data-delay="1">{body}</div>
 </section>
 
-<section class="wrap">{gallery}</section>
+{viewer}
 
 <a class="next" href="{nxt['slug']}.html">
   <div class="wrap">
