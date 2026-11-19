@@ -255,7 +255,9 @@ body.menu-open .menu-toggle span::after{transform:translateY(-5px) rotate(-45deg
 .next{display:block;background:var(--paper-2);border-top:1px solid var(--line);padding:clamp(50px,7vw,90px) 0}
 .next .eyebrow{margin-bottom:14px}
 .next h2{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,5vw,4rem);line-height:1.02;margin:0;transition:color .3s}
+.next h2 svg{width:.55em;height:.55em;vertical-align:baseline;transition:transform .3s var(--ease)}
 .next:hover h2{color:var(--oak-deep)}
+.next:hover h2 svg{transform:translate(4px,-4px)}
 
 /* ---------- Lightbox ---------- */
 .lightbox{

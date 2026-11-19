@@ -31,20 +31,81 @@ def clear():
                 block.remove(item)
 
 
-def mat(name, color, rough=0.6, metal=0.0, emission=None, strength=0.0):
+def _set(node, name, value):
+    if name in node.inputs:
+        node.inputs[name].default_value = value
+
+
+def mat(name, color, rough=0.6, metal=0.0, emission=None, strength=0.0,
+        grain=0.0, grain_scale=6.0, grain_contrast=0.35, micro=0.0,
+        weave=0.0, coat=0.0, sheen=0.0, vary=0.05):
+    """Principled BSDF with procedural grain, micro-bump, fabric sheen and
+    non-uniform roughness, so surfaces read as real rather than flat plastic."""
     m = bpy.data.materials.new(name)
     m.use_nodes = True
-    bsdf = m.node_tree.nodes.get("Principled BSDF")
-    bsdf.inputs["Base Color"].default_value = srgb(color)
-    bsdf.inputs["Roughness"].default_value = rough
-    bsdf.inputs["Metallic"].default_value = metal
+    nt = m.node_tree
+    bsdf = nt.nodes.get("Principled BSDF")
+    base = srgb(color)
+    _set(bsdf, "Base Color", base)
+    _set(bsdf, "Roughness", rough)
+    _set(bsdf, "Metallic", metal)
     if emission:
-        for key in ("Emission Color", "Emission"):
-            if key in bsdf.inputs:
-                bsdf.inputs[key].default_value = srgb(emission)
-                break
-        if "Emission Strength" in bsdf.inputs:
-            bsdf.inputs["Emission Strength"].default_value = strength
+        _set(bsdf, "Emission Color", srgb(emission))
+        _set(bsdf, "Emission", srgb(emission))
+        _set(bsdf, "Emission Strength", strength)
+    if coat:
+        _set(bsdf, "Coat Weight", coat)
+        _set(bsdf, "Coat Roughness", 0.12)
+    if sheen:
+        _set(bsdf, "Sheen Weight", sheen)
+        _set(bsdf, "Sheen Roughness", 0.35)
+
+    if grain or weave or micro or vary:
+        tex = nt.nodes.new("ShaderNodeTexCoord")
+        mp = nt.nodes.new("ShaderNodeMapping")
+        nt.links.new(tex.outputs["Object"], mp.inputs["Vector"])
+
+    if vary or micro or weave:
+        nz = nt.nodes.new("ShaderNodeTexNoise")
+        nz.inputs["Scale"].default_value = 900.0 if weave else 26.0
+        nz.inputs["Detail"].default_value = 6.0
+        nz.inputs["Roughness"].default_value = 0.6
+        nt.links.new(mp.outputs["Vector"], nz.inputs["Vector"])
+        if vary:
+            mr = nt.nodes.new("ShaderNodeMapRange")
+            mr.inputs["To Min"].default_value = max(0.0, rough - vary)
+            mr.inputs["To Max"].default_value = min(1.0, rough + vary)
+            nt.links.new(nz.outputs["Fac"], mr.inputs["Value"])
+            nt.links.new(mr.outputs["Result"], bsdf.inputs["Roughness"])
+        if micro or weave:
+            bump = nt.nodes.new("ShaderNodeBump")
+            bump.inputs["Strength"].default_value = weave if weave else micro
+            nt.links.new(nz.outputs["Fac"], bump.inputs["Height"])
+            nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
+
+    if grain:
+        wv = nt.nodes.new("ShaderNodeTexWave")
+        wv.wave_type = "BANDS"
+        wv.bands_direction = "Y"
+        wv.inputs["Scale"].default_value = grain_scale
+        wv.inputs["Distortion"].default_value = 9.0
+        wv.inputs["Detail"].default_value = 5.0
+        if "Detail Scale" in wv.inputs:
+            wv.inputs["Detail Scale"].default_value = 1.4
+        nt.links.new(mp.outputs["Vector"], wv.inputs["Vector"])
+        rmp = nt.nodes.new("ShaderNodeValToRGB")
+        dark = tuple(c * (1.0 - grain_contrast) for c in base[:3]) + (1.0,)
+        rmp.color_ramp.elements[0].position = 0.28
+        rmp.color_ramp.elements[0].color = dark
+        rmp.color_ramp.elements[1].position = 0.72
+        rmp.color_ramp.elements[1].color = base
+        nt.links.new(wv.outputs["Fac"], rmp.inputs["Fac"])
+        nt.links.new(rmp.outputs["Color"], bsdf.inputs["Base Color"])
+        if not (micro or weave):
+            bump = nt.nodes.new("ShaderNodeBump")
+            bump.inputs["Strength"].default_value = 0.12
+            nt.links.new(wv.outputs["Fac"], bump.inputs["Height"])
+            nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
     return m
 
 
@@ -148,22 +209,26 @@ def camera(loc, target, lens=34):
 
 def palette():
     return {
-        "cream": mat("Cream", "#f1e9dc", 0.85),
-        "cream_deep": mat("Cream deep", "#e4d8c6", 0.8),
-        "oak": mat("Oak", "#b98d5f", 0.55),
-        "oak_dark": mat("Oak dark", "#8a643f", 0.6),
-        "charcoal": mat("Charcoal", "#3b3631", 0.7),
-        "sage": mat("Sage", "#8f9c88", 0.9),
-        "terracotta": mat("Terracotta", "#b06a4f", 0.85),
-        "linen": mat("Linen", "#ddd2c0", 0.95),
-        "white": mat("Warm white", "#f5f1e8", 0.9),
-        "brass": mat("Brass", "#b08d57", 0.3, 0.85),
-        "floor": mat("Floor", "#a97c50", 0.5),
-        "leaf": mat("Leaf", "#5f7355", 0.8),
-        "glass": mat("Window light", "#f7efe0", 0.4, 0.0, "#fff3dd", 1.5),
+        "cream": mat("Cream", "#f1e9dc", 0.92, micro=0.04),
+        "cream_deep": mat("Cream deep", "#e4d8c6", 0.88, sheen=0.35, vary=0.06),
+        "oak": mat("Oak", "#b98d5f", 0.5, grain=1, grain_scale=7.0, coat=0.16, vary=0.05),
+        "oak_dark": mat("Oak dark", "#8a643f", 0.55, grain=1, grain_scale=7.0, coat=0.08, vary=0.05),
+        "charcoal": mat("Charcoal", "#3b3631", 0.62, vary=0.06),
+        "sage": mat("Sage", "#8f9c88", 0.92, sheen=0.5, weave=0.25, vary=0.05),
+        "terracotta": mat("Terracotta", "#b06a4f", 0.85, micro=0.06, vary=0.05),
+        "linen": mat("Linen", "#ddd2c0", 0.95, sheen=0.6, weave=0.3, vary=0.05),
+        "white": mat("Warm white", "#f5f1e8", 0.9, micro=0.03, vary=0.05),
+        "brass": mat("Brass", "#b08d57", 0.28, 0.85, vary=0.08),
+        "floor": mat("Floor", "#a97c50", 0.45, grain=1, grain_scale=5.5, coat=0.14, vary=0.05),
+        "leaf": mat("Leaf", "#5f7355", 0.8, micro=0.05),
+        "sprig": mat("Sprig green", "#7c8b6a", 0.85, micro=0.05),
+        "appliance": mat("Appliance", "#f2f0ea", 0.28, coat=0.4, vary=0.03),
+        "counter": mat("Counter stone", "#ece4d6", 0.3, coat=0.25, micro=0.02, vary=0.04),
+        "glass": mat("Window light", "#f7efe0", 0.4, 0.0, "#fff3dd", 2.2),
+        "outside": mat("Outside green", "#93a184", 0.9, 0.0, "#8ea079", 0.5),
         "lamp": mat("Lamp shade", "#f3e6cf", 0.6, 0.0, "#ffd9a0", 4.0),
-        "art1": mat("Art 1", "#c9a98a", 0.9),
-        "art2": mat("Art 2", "#7d8b7c", 0.9),
+        "art1": mat("Art 1", "#c9a98a", 0.9, micro=0.03),
+        "art2": mat("Art 2", "#7d8b7c", 0.9, micro=0.03),
     }
 
 
@@ -185,6 +250,27 @@ def plant(name, loc, scale, p):
                p["leaf"], scale=(1.0, 0.75, 1.25))
     cyl(name + " stem", 0.012 * scale, 0.38 * scale,
         (loc[0], loc[1], loc[2] + 0.24 * scale), p["oak_dark"])
+
+
+def sprig(name, loc, scale, p):
+    # a slender vase with a few leafy stems: reads as a small table plant
+    cyl(name + " vase", 0.05 * scale, 0.24 * scale,
+        (loc[0], loc[1], loc[2] + 0.12 * scale), p["terracotta"])
+    top = loc[2] + 0.24 * scale
+    for i, (dx, dy, tilt, dz, s) in enumerate([
+        (0.00, 0.00, 0.0, 0.26, 1.00), (0.05, 0.02, 0.30, 0.22, 0.88),
+        (-0.05, 0.03, -0.32, 0.21, 0.85), (0.02, -0.05, 0.14, 0.19, 0.80),
+        (-0.02, -0.04, -0.14, 0.17, 0.74),
+    ]):
+        cyl(name + " stem %d" % i, 0.006 * scale, dz * scale,
+            (loc[0] + dx * scale, loc[1] + dy * scale, top + dz * scale / 2),
+            p["leaf"], rot=(tilt, 0, 0), vertices=8)
+        for j in range(3):
+            f = 0.35 + 0.3 * j
+            sphere(name + " leaf %d-%d" % (i, j), 0.055 * scale * s,
+                   (loc[0] + dx * scale * f + (0.02 if j % 2 else -0.02) * scale,
+                    loc[1] + dy * scale * f, top + dz * scale * f),
+                   p["sprig"], scale=(0.6, 0.6, 1.6))
 
 
 def bookshelf(name, loc, rot_z, p):
@@ -233,12 +319,15 @@ def rug(name, loc, w, d, material, z=0.008):
     box(name, (w, d, 0.015), (loc[0], loc[1], z), material, bevel=0.004)
 
 
-def setup_render(cam_loc, cam_target, lens, path, samples=28):
+def setup_render(cam_loc, cam_target, lens, path, samples=64):
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
     scene.cycles.device = "CPU"
     scene.cycles.samples = samples
     scene.cycles.use_denoising = True
+    scene.cycles.max_bounces = 8
+    scene.cycles.diffuse_bounces = 4
+    scene.cycles.glossy_bounces = 4
     scene.render.resolution_x = 1280
     scene.render.resolution_y = 720
     scene.render.resolution_percentage = 100
@@ -246,18 +335,29 @@ def setup_render(cam_loc, cam_target, lens, path, samples=28):
     scene.render.image_settings.color_mode = "RGB"
     scene.render.filepath = path
     scene.view_settings.view_transform = "AgX"
-    scene.view_settings.exposure = -1.1
+    scene.view_settings.exposure = -0.9
     try:
         scene.view_settings.look = "AgX - Medium High Contrast"
     except Exception:
         pass
-    camera(cam_loc, cam_target, lens)
+    cam = camera(cam_loc, cam_target, lens)
+    cam.data.dof.use_dof = True
+    cam.data.dof.focus_distance = (Vector(cam_target) - Vector(cam_loc)).length
+    cam.data.dof.aperture_fstop = 7.1
     world = bpy.data.worlds.new("World")
     world.use_nodes = True
     bg = world.node_tree.nodes["Background"]
-    bg.inputs[0].default_value = srgb("#cfc3b2")
-    bg.inputs[1].default_value = 0.45
+    bg.inputs[0].default_value = srgb("#d9cdbb")
+    bg.inputs[1].default_value = 0.6
     scene.world = world
+    sun_data = bpy.data.lights.new("Sun", "SUN")
+    sun_data.energy = 2.2
+    sun_data.angle = math.radians(2.0)
+    sun_data.color = (1.0, 0.95, 0.86)
+    sun = bpy.data.objects.new("Sun", sun_data)
+    bpy.context.collection.objects.link(sun)
+    sun.location = (cam_loc[0] + 0.6, cam_loc[1] - 1.8, cam_loc[2] + 2.2)
+    look_at(sun, cam_target)
 
 
 def room(w, d, p):
@@ -269,12 +369,15 @@ def room(w, d, p):
 
 def window(name, loc, w, h, p):
     face = loc[1]
-    box(name + " glow", (w, 0.02, h), (loc[0], face - 0.02, loc[2]), p["glass"])
-    box(name + " frame top", (w + 0.1, 0.07, 0.07), (loc[0], face - 0.05, loc[2] + h / 2), p["white"])
-    box(name + " frame bottom", (w + 0.1, 0.07, 0.07), (loc[0], face - 0.05, loc[2] - h / 2), p["white"])
+    # pane reads as "outside": soft daylight above, muted greenery below
+    box(name + " sky", (w, 0.02, h * 0.62), (loc[0], face - 0.02, loc[2] + h * 0.19), p["glass"])
+    box(name + " outside", (w, 0.02, h * 0.38), (loc[0], face - 0.019, loc[2] - h * 0.31), p["outside"])
+    box(name + " frame top", (w + 0.12, 0.09, 0.09), (loc[0], face - 0.05, loc[2] + h / 2), p["oak_dark"])
+    box(name + " frame bottom", (w + 0.12, 0.09, 0.09), (loc[0], face - 0.05, loc[2] - h / 2), p["oak_dark"])
+    box(name + " sill", (w + 0.22, 0.14, 0.05), (loc[0], face - 0.08, loc[2] - h / 2 - 0.05), p["cream"])
     for i in (-1, 1):
-        box(name + " frame side", (0.07, 0.07, h), (loc[0] + i * w / 2, face - 0.05, loc[2]), p["white"])
-    box(name + " mullion", (0.045, 0.06, h), (loc[0], face - 0.045, loc[2]), p["white"])
+        box(name + " frame side", (0.09, 0.09, h + 0.09), (loc[0] + i * w / 2, face - 0.05, loc[2]), p["oak_dark"])
+    box(name + " mullion", (0.05, 0.07, h), (loc[0], face - 0.05, loc[2]), p["oak_dark"])
 
 
 def reading_nook():
@@ -294,8 +397,7 @@ def reading_nook():
     cyl("Table top", 0.225, 0.035, (-0.55, 0.55, 0.5275), p["oak"])
     cyl("Table stem", 0.03, 0.48, (-0.55, 0.55, 0.27), p["brass"])
     cyl("Table base", 0.14, 0.025, (-0.55, 0.55, 0.0125), p["brass"])
-    cyl("Vase", 0.05, 0.18, (-0.55, 0.55, 0.645), p["terracotta"])
-    sphere("Vase bloom", 0.06, (-0.55, 0.55, 0.795), p["sage"], scale=(1, 1, 1.2))
+    sprig("Table sprig", (-0.55, 0.55, 0.545), 0.85, p)
 
     cyl("Lamp pole", 0.016, 1.55, (-1.85, -0.25, 0.775), p["charcoal"])
     cone("Lamp shade", 0.22, 0.11, 0.3, (-1.85, -0.25, 1.58), p["lamp"])
@@ -338,8 +440,7 @@ def dining_corner():
     cyl("Pendant cord", 0.008, 1.14, (0.0, 0.15, 2.29), p["charcoal"])
     cone("Pendant shade", 0.22, 0.09, 0.22, (0.0, 0.15, 1.61), p["lamp"])
 
-    cyl("Vase tall", 0.07, 0.30, (0.0, 0.15, 0.90), p["terracotta"])
-    sphere("Branch", 0.11, (0.05, 0.15, 1.12), p["sage"], scale=(0.7, 0.7, 1.3))
+    sprig("Table sprig", (0.0, 0.15, 0.75), 1.1, p)
 
     box("Sideboard", (1.4, 0.4, 0.62), (-1.62, 1.82, 0.31), p["oak"], bevel=0.015)
     box("Sideboard top", (1.44, 0.44, 0.03), (-1.62, 1.82, 0.635), p["oak_dark"])
@@ -459,10 +560,10 @@ def warm_kitchen():
 
     # 900 mm worktops, 600 mm deep; work triangle about 1.6 / 1.5 / 2.7 m
     box("Base run", (4.40, 0.60, 0.85), (0.0, 1.52, 0.425), p["oak"], bevel=0.01)
-    box("Worktop run", (4.50, 0.62, 0.05), (0.0, 1.51, 0.875), p["cream"], bevel=0.005)
-    box("Upstand", (4.50, 0.03, 0.10), (0.0, 1.82, 0.95), p["cream_deep"])
+    box("Worktop run", (4.50, 0.62, 0.05), (0.0, 1.51, 0.875), p["counter"], bevel=0.005)
+    box("Upstand", (4.50, 0.03, 0.10), (0.0, 1.82, 0.95), p["counter"])
 
-    box("Fridge", (0.70, 0.68, 1.95), (-1.75, 1.44, 0.975), p["white"], bevel=0.02)
+    box("Fridge", (0.70, 0.68, 1.95), (-1.75, 1.44, 0.975), p["appliance"], bevel=0.02)
     box("Fridge seam", (0.66, 0.01, 0.02), (-1.75, 1.095, 1.26), p["charcoal"])
     box("Fridge handle", (0.03, 0.04, 0.50), (-1.47, 1.09, 1.55), p["brass"])
 
@@ -479,14 +580,14 @@ def warm_kitchen():
     cyl("Tap spout", 0.012, 0.20, (0.95, 1.65, 1.16), p["brass"],
         rot=(math.radians(90), 0, 0), vertices=16)
 
-    box("Hood", (0.60, 0.45, 0.18), (-0.10, 1.58, 1.75), p["white"], bevel=0.02)
-    box("Hood chimney", (0.22, 0.22, 0.92), (-0.10, 1.70, 2.30), p["white"])
+    box("Hood", (0.60, 0.45, 0.18), (-0.10, 1.58, 1.75), p["appliance"], bevel=0.02)
+    box("Hood chimney", (0.22, 0.22, 0.92), (-0.10, 1.70, 2.30), p["appliance"])
     box("Upper cabinet L", (1.20, 0.35, 0.72), (-1.55, 1.66, 1.86), p["oak"], bevel=0.01)
     box("Upper cabinet R", (0.40, 0.35, 0.72), (1.65, 1.66, 1.86), p["oak"], bevel=0.01)
 
     # 2.2 x 0.9 m island, 900 mm top, 1.1 m aisle to the back run
     box("Island base", (2.20, 0.90, 0.85), (0.50, -0.32, 0.425), p["oak"], bevel=0.01)
-    box("Island top", (2.30, 1.00, 0.06), (0.50, -0.32, 0.88), p["cream"], bevel=0.01)
+    box("Island top", (2.30, 1.00, 0.06), (0.50, -0.32, 0.88), p["counter"], bevel=0.01)
     cyl("Island bowl", 0.14, 0.08, (0.30, -0.32, 0.95), p["terracotta"])
     box("Cutting board", (0.42, 0.28, 0.03), (1.05, -0.28, 0.925), p["oak_dark"])
 
@@ -503,7 +604,7 @@ def warm_kitchen():
         cyl("Pendant cord %d" % i, 0.006, 1.02, (x, -0.32, 2.35), p["charcoal"], vertices=12)
         cone("Pendant shade %d" % i, 0.15, 0.05, 0.18, (x, -0.32, 1.75), p["lamp"])
 
-    plant("Plant", (2.10, 1.55, 0.0), 1.2, p)
+    plant("Herb pot", (1.9, 1.51, 0.90), 0.6, p)
     setup_render((3.30, -3.30, 1.70), (0.15, 0.55, 1.00), 30,
                  os.path.join(RENDERS, "warm-kitchen.png"))
 
